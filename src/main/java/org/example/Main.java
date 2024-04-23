@@ -1,9 +1,11 @@
 package org.example;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.sql.*;
 import java.util.*;
 
 
@@ -32,12 +34,10 @@ public class Main {
 
     static class HolidayScheduler {
         JFrame f;
-        String select=null;
-
 
         HolidayScheduler() throws IOException {
             f = new JFrame("Holiday Scheduler");
-
+            wishListHolidays = new LinkedHashSet<>();
             JLabel appName = new JLabel("Holiday Scheduler");
             appName.setFont(new Font("Georgia", Font.ITALIC, 70));
             appName.setForeground(new Color(255, 255, 255));
@@ -48,32 +48,32 @@ public class Main {
             countryName.setForeground(new Color(255, 255, 255));
             countryName.setBounds(100, 120, 180, 30);
 
-            countryCodeMap=CountryCode.getCountryCodeMap();
+            countryCodeMap = CountryCode.getCountryCodeMap();
 
             countryComboBox = new JComboBox<>(countryCodeMap.keySet().toArray(new String[0]));
-            countryComboBox.setFont(new Font("Georgia",Font.ITALIC,18));
+            countryComboBox.setFont(new Font("Georgia", Font.ITALIC, 18));
             countryComboBox.addActionListener(e -> {
                 selectedCountry = (String) countryComboBox.getSelectedItem();
                 printHoliday(selectedCountry);
             });
             countryComboBox.setBounds(260, 120, 200, 30);
 
-            JLabel year=new JLabel("Year: ");
+            JLabel year = new JLabel("Year: ");
             year.setFont(new Font("Georgia", Font.PLAIN, 23));
             year.setForeground(new Color(255, 255, 255));
-            year.setBounds(490,120,100,30);
+            year.setBounds(490, 120, 100, 30);
 
-            yearField=new JTextField();
+            yearField = new JTextField();
             yearField.setFont(new Font("Georgia", Font.PLAIN, 23));
-            yearField.setBounds(550,120,80,30);
+            yearField.setBounds(550, 120, 80, 30);
 
-            JLabel month=new JLabel("Month:");
+            JLabel month = new JLabel("Month:");
             month.setFont(new Font("Georgia", Font.PLAIN, 23));
             month.setForeground(new Color(255, 255, 255));
-            month.setBounds(650,120,100,30);
+            month.setBounds(650, 120, 100, 30);
 
 
-            monthCodeMap=getMonthMap();
+            monthCodeMap = getMonthMap();
             monthComboBox = new JComboBox<>(monthCodeMap.keySet().toArray(new String[0]));
             monthComboBox.setFont(new Font("Georgia", Font.PLAIN, 20));
             monthComboBox.setBounds(730, 120, 130, 30);
@@ -82,39 +82,39 @@ public class Main {
                 printHoliday(selectedMonth);
             });
 
-            JLabel day=new JLabel("Day:");
+            JLabel day = new JLabel("Day:");
             day.setFont(new Font("Georgia", Font.PLAIN, 23));
             day.setForeground(new Color(255, 255, 255));
-            day.setBounds(870,120,100,30);
+            day.setBounds(870, 120, 100, 30);
 
-            dayCodeMap=getDayMap();
+            dayCodeMap = getDayMap();
             dayComboBox = new JComboBox<>(dayCodeMap.keySet().toArray(new String[0]));
-            dayComboBox.setFont(new Font("Georgia",Font.ITALIC,18));
+            dayComboBox.setFont(new Font("Georgia", Font.ITALIC, 18));
             dayComboBox.setBounds(920, 120, 120, 30);
-            dayComboBox.addActionListener(e->{
-                selectedDay=(String)dayComboBox.getSelectedItem();
+            dayComboBox.addActionListener(e -> {
+                selectedDay = (String) dayComboBox.getSelectedItem();
                 printHoliday(selectedDay);
             });
 
-            JButton showHolidays=new JButton("Show Holidays");
-            showHolidays.setFont(new Font("Georgia",Font.PLAIN,23));
-            showHolidays.setBounds(1050,120,200,30);
-            showHolidays.addActionListener(e-> fetchHolidays());
+            JButton showHolidays = new JButton("Show Holidays");
+            showHolidays.setFont(new Font("Georgia", Font.PLAIN, 23));
+            showHolidays.setBounds(1050, 120, 200, 30);
+            showHolidays.addActionListener(e -> fetchHolidays());
 
-            JLabel allHoliday=new JLabel("ALL HOLIDAYS");
+            JLabel allHoliday = new JLabel("ALL HOLIDAYS");
             allHoliday.setForeground(Color.white);
             allHoliday.setFont(new Font("Georgia", Font.PLAIN, 40));
-            allHoliday.setBounds(230,195,400,50);
+            allHoliday.setBounds(230, 195, 400, 50);
 
-            JLabel wishedHoliday=new JLabel("WISHED HOLIDAYS");
+            JLabel wishedHoliday = new JLabel("WISHED HOLIDAYS");
             wishedHoliday.setForeground(Color.white);
             wishedHoliday.setFont(new Font("Georgia", Font.PLAIN, 40));
-            wishedHoliday.setBounds(830,195,400,50);
-            
-            scroll=new JScrollPane(ls);
-            scroll.setBounds(80,250,600,630);
-            wishScroll=new JScrollPane(wl);
-            wishScroll.setBounds(720,250,600,630);
+            wishedHoliday.setBounds(830, 195, 400, 50);
+
+            scroll = new JScrollPane(ls);
+            scroll.setBounds(80, 250, 600, 630);
+            wishScroll = new JScrollPane(wl);
+            wishScroll.setBounds(720, 250, 600, 630);
 
             f.add(appName);
             f.add(countryName);
@@ -139,7 +139,7 @@ public class Main {
             f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         }
 
-        public void printHoliday(String selectedColor){
+        public void printHoliday(String selectedColor) {
             System.out.println(selectedColor);
         }
 
@@ -185,17 +185,16 @@ public class Main {
             }
             AllHolidays allHolidays = new AllHolidays(apiUrl);
             holidays = (ArrayList<Holiday>) allHolidays.fetchAllHolidays();
-            selectedDay=dayCodeMap.get(selectedDay);
-            if(!Objects.equals(selectedDay,null)){
+            selectedDay = dayCodeMap.get(selectedDay);
+            if (!Objects.equals(selectedDay, null)) {
                 filteredHolidays = filterHolidaysByDay(holidays, selectedDay);
-            }
-            else{
-                filteredHolidays=holidays;
+            } else {
+                filteredHolidays = holidays;
             }
             System.out.println(filteredHolidays.get(0).getHolidayDay());
             makeTheList(filteredHolidays);
-
         }
+
         void makeTheList(ArrayList<Holiday> filteredHolidays) {
             if (df == null) {
                 df = new DefaultListModel<>();
@@ -203,8 +202,7 @@ public class Main {
                 df.clear();
             }
             for (Holiday filteredHoliday : filteredHolidays) {
-                String formattedOutput = String.format(" %-33s | %-33s | %-33s ",
-                        filteredHoliday.getHolidayName(), filteredHoliday.getHolidayDay(), filteredHoliday.getHolidayDate());
+                String formattedOutput = String.format(" %-33s | %-33s | %-33s ", filteredHoliday.getHolidayName(), filteredHoliday.getHolidayDay(), filteredHoliday.getHolidayDate());
                 df.addElement(formattedOutput);
             }
             if (ls == null) {
@@ -227,18 +225,16 @@ public class Main {
                         return c;
                     }
                 });
-                wishListHolidays=new HashSet<>();
+
                 ls.addMouseListener(new MouseAdapter() {
                     @Override
-                    public void mouseReleased(MouseEvent e) {
+                    public void mouseClicked(MouseEvent e) {
                         if (ls.getSelectedIndex() != -1) {
                             String[] holiday = ls.getSelectedValue().split("\\|");
                             printHoliday(holiday[0]);
                             Holiday wishedHoliday = new Holiday(holiday[0], holiday[1], holiday[2]);
-                            if (!wishListHolidays.contains(wishedHoliday)) {
-                                wishListHolidays.add(wishedHoliday);
-                                makeTheWishList(wishListHolidays);
-                            }
+                            saveInDatabase(wishedHoliday);
+
                         }
                     }
                 });
@@ -246,6 +242,8 @@ public class Main {
                 ls.setModel(df);
             }
         }
+
+
         void makeTheWishList(Set<Holiday> wishListHolidays) {
             if (dw == null) {
                 dw = new DefaultListModel<>();
@@ -253,8 +251,7 @@ public class Main {
                 dw.clear();
             }
             for (Holiday filteredHoliday : wishListHolidays) {
-                String formattedOutput = String.format(" %-33s | %-33s | %-33s ",
-                        filteredHoliday.getHolidayName(), filteredHoliday.getHolidayDay(), filteredHoliday.getHolidayDate());
+                String formattedOutput = String.format(" %-33s | %-33s | %-33s ", filteredHoliday.getHolidayName(), filteredHoliday.getHolidayDay(), filteredHoliday.getHolidayDate());
                 dw.addElement(formattedOutput);
             }
             if (wl == null) {
@@ -268,22 +265,137 @@ public class Main {
                         c.setFont(c.getFont().deriveFont(Font.PLAIN, 15));
                         if (index >= 0 && index % 2 == 0) {
                             c.setBackground(new Color(230, 230, 230));
-                            c.setForeground(new Color(5,25,35));
+                            c.setForeground(new Color(5, 25, 35));
                         } else {
-                            c.setBackground(new Color(5,25,35));
+                            c.setBackground(new Color(5, 25, 35));
                             c.setForeground(new Color(230, 230, 230));
                         }
                         c.setPreferredSize(new Dimension(c.getPreferredSize().width, 35));
                         return c;
                     }
                 });
-                wl.addListSelectionListener(e->{
-                    // Add your list selection listener code here
+                wl.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        if (wl.getSelectedIndex() != -1) {
+                            String[] holiday = wl.getSelectedValue().split("\\|");
+                            String selectedHolidayName = holiday[0].trim();
+                            System.out.println("Selected Holiday Name: " + selectedHolidayName);
+
+                            for (Holiday h : wishListHolidays) {
+                                if (h.getHolidayName().trim().equals(selectedHolidayName)) {
+                                    deleteFromDatabase(h);
+                                    break;
+                                }
+                            }
+                            for (Holiday h : wishListHolidays) {
+                                System.out.println(h.getHolidayName());
+                            }
+                        }
+                    }
                 });
             } else {
                 wl.setModel(dw);
             }
         }
+
+
+        private void saveInDatabase(Holiday wishedHoliday) {
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                String url = "jdbc:mysql://127.0.0.1:3306/k21bp";
+                String dbUsername = "root";
+                String dbPassword = "@Sachin3214mysql";
+                try (Connection con = DriverManager.getConnection(url, dbUsername, dbPassword)) {
+                    String checksql = "Select count(*) from Holidays where HolidayName=?";
+                    try (PreparedStatement check = con.prepareStatement(checksql)) {
+                        check.setString(1, wishedHoliday.getHolidayName());
+                        try (ResultSet resultSet = check.executeQuery()) {
+                            resultSet.next();
+                            int count = resultSet.getInt(1);
+                            if (count > 0) {
+                                System.out.println("This Holiday Already present");
+                                return;
+                            }
+                        }
+                    }
+
+
+                    String sql = "Insert Into Holidays (HolidayName,HolidayDay,HolidayDate) Values (?,?,?)";
+                    try (PreparedStatement smt = con.prepareStatement(sql)) {
+                        smt.setString(1, wishedHoliday.getHolidayName());
+                        smt.setString(2, wishedHoliday.getHolidayDay());
+                        smt.setString(3, wishedHoliday.getHolidayDate());
+                        int rowsInserted = smt.executeUpdate();
+                        if (rowsInserted > 0) {
+                            System.out.println("Added Successfully");
+                            getHolidayFromDatabase(false);
+                        } else {
+                            System.out.println("Not added");
+                        }
+                    }
+
+                }
+            } catch (ClassNotFoundException | SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        private void getHolidayFromDatabase(boolean first) {
+            if (!first) {
+                wishListHolidays = new LinkedHashSet<>();
+            }
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                String url = "jdbc:mysql://127.0.0.1:3306/k21bp";
+                String dbUsername = "root";
+                String dbPassword = "@Sachin3214mysql";
+                try (Connection con = DriverManager.getConnection(url, dbUsername, dbPassword)) {
+                    String sql = "SELECT HolidayName, HolidayDay, HolidayDate FROM Holidays";
+                    try (PreparedStatement smt = con.prepareStatement(sql)) {
+                        try (ResultSet rs = smt.executeQuery()) {
+                            while (rs.next()) {
+                                String holidayName = rs.getString("HolidayName");
+                                String holidayDay = rs.getString("HolidayDay");
+                                String holidayDate = rs.getString("HolidayDate");
+                                Holiday holiday = new Holiday(holidayName, holidayDay, holidayDate);
+                                wishListHolidays.add(holiday);
+                            }
+                        }
+                    }
+                }
+                makeTheWishList(wishListHolidays);
+            } catch (ClassNotFoundException | SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+
+        private void deleteFromDatabase(Holiday wishedHoliday) {
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                String url = "jdbc:mysql://127.0.0.1:3306/k21bp";
+                String dbUsername = "root";
+                String dbPassword = "@Sachin3214mysql";
+                try (Connection con = DriverManager.getConnection(url, dbUsername, dbPassword)) {
+                    String sql = "DELETE FROM Holidays WHERE HolidayName=?";
+                    try (PreparedStatement smt = con.prepareStatement(sql)) {
+                        smt.setString(1, wishedHoliday.getHolidayName());
+                        int rowsDeleted = smt.executeUpdate();
+                        if (rowsDeleted > 0) {
+                            System.out.println("Deleted successfully.");
+                            getHolidayFromDatabase(false);
+                        } else {
+                            System.out.println("Failed to delete holiday.");
+                        }
+                    }
+                }
+            } catch (ClassNotFoundException | SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+
         private ArrayList<Holiday> filterHolidaysByDay(ArrayList<Holiday> holidays, String dayOfWeek) {
             ArrayList<Holiday> filteredHolidays = new ArrayList<>();
             for (Holiday holiday : holidays) {
@@ -299,7 +411,7 @@ public class Main {
     }
 
     public static void main(String[] args) throws IOException {
-        HolidayScheduler obj=new HolidayScheduler();
-        System.out.println(selectedMonth);
+        HolidayScheduler obj = new HolidayScheduler();
+        obj.getHolidayFromDatabase(true);
     }
 }

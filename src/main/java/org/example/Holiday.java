@@ -1,9 +1,9 @@
 package org.example;
 
 public  class Holiday {
-    private String HolidayName;
-    private String HolidayDay;
-    private String HolidayDate;
+    private final String HolidayName;
+    private final String HolidayDay;
+    private final String HolidayDate;
 
     public Holiday(String holidayName, String holidayDay, String holidayDate) {
         HolidayName = holidayName;

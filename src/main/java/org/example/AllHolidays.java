@@ -13,7 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class AllHolidays {
-    private String apiUrl;
+    private final String apiUrl;
 
     public AllHolidays(String apiUrl) {
         this.apiUrl = apiUrl;
@@ -47,7 +47,7 @@ public class AllHolidays {
             }
 
         } catch (IOException | ParseException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
 
         return holidays;

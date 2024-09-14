@@ -1,9 +1,11 @@
-package org.example;
+package org.example.utils;
+
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.example.model.Holiday;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,7 +22,7 @@ public class AllHolidays {
     }
 
     public List<Holiday> fetchAllHolidays() {
-        List<Holiday> holidays = new ArrayList<>(); // Use ArrayList for the list
+        List<Holiday> holidays = new ArrayList<>();
 
         try {
             InputStream inputStream = new URL(apiUrl).openStream();
@@ -49,8 +51,6 @@ public class AllHolidays {
         } catch (IOException | ParseException e) {
             System.out.println(e.getMessage());
         }
-
         return holidays;
     }
-
 }

@@ -1,4 +1,5 @@
-package org.example;
+package org.example.utils;
+
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -48,7 +49,6 @@ public class CountryCode {
             System.out.println("HTTP Response Code: " + responseCode);
         }
 
-        // Sort the map by country name
 
         return countryCodeMap.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
